@@ -1,0 +1,51 @@
+# This file is a template, and might need editing before it works on your project.
+# use the official gcc image, based on debian
+# can use verions as well, like gcc:5.2
+# see https://hub.docker.com/_/gcc/
+image: conanio/gcc49
+
+build:
+  stage: build
+  before_script:
+    # Upgrade Conan version
+    - sudo pip install --upgrade conan
+    # Install dependencies to generate documentation
+    - sudo apt-get -qq update
+    - sudo apt-get install -y --force-yes --no-install-recommends doxygen
+    - sudo pip install breathe
+    - sudo pip install sphinx
+    # Automatic detection of your arch, compiler, etc.
+    - conan user
+
+  script:
+    # Download dependencies, build, test and create package
+    - conan install . -if build -b missing
+    - conan build . -bf build
+
+  artifacts:
+    paths:
+      - build
+
+# run tests using the binary built before
+test:
+  stage: test
+  script:
+    - sudo pip install gcovr
+    - ./build/fibonacci/bin/fibonacci_test --gtest_output="xml:testing-report.xml"
+    - gcovr . build/ --xml-pretty -o coverage-report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: testing-report.xml
+      cobertura: coverage-report.xml
+
+# Deploy documentation to pages
+pages:
+  stage: deploy
+  script:
+    - mv ./build/docs/sphinx public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master

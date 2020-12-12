@@ -23,7 +23,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: docker://conanio/gcc49
+      - uses: docker://conanio/gcc9
       - uses: actions/checkout@v2
 
       # Runs a set of commands using the runners shell
@@ -43,5 +43,25 @@ jobs:
         run: |
           conan install . -if build -b missing
           conan build . -bf build
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: |
+            build
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker://conanio/gcc9
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+
+      - name: Run tests
+        run: |
           ./build/fibonacci/bin/fibonacci_test --gtest_output="xml:testing-report.xml"
           gcovr . build/ --xml-pretty -o coverage-report.xml

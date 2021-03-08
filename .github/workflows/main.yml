@@ -43,6 +43,11 @@ jobs:
         run: |
           conan install . -if build -b missing
           conan build . -bf build
+      
+      - name: Run tests
+        run: |
+          ./build/fibonacci/bin/fibonacci_test --gtest_output="xml:testing-report.xml"
+          gcovr . build/ --xml-pretty -o coverage-report.xml
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
@@ -50,18 +55,3 @@ jobs:
           name: build-artifacts
           path: |
             build
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: docker://conanio/gcc9
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-
-      - name: Run tests
-        run: |
-          ./build/fibonacci/bin/fibonacci_test --gtest_output="xml:testing-report.xml"
-          gcovr . build/ --xml-pretty -o coverage-report.xml

@@ -48,6 +48,15 @@ jobs:
         run: |
           ./build/fibonacci/bin/fibonacci_test --gtest_output="xml:testing-report.xml"
           gcovr . build/ --xml-pretty -o coverage-report.xml
+          
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage-report.xml
+          directory: ./
+          fail_ci_if_error: true
+          verbose: true
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2

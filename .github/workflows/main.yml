@@ -47,7 +47,7 @@ jobs:
       - name: Run tests
         run: |
           ./build/fibonacci/bin/fibonacci_test --gtest_output="xml:testing-report.xml"
-          gcovr . build/ --xml-pretty -o coverage-report.xml
+          gcovr . build/ --exclude fibonacci/test --xml-pretty -o coverage-report.xml
           
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
